@@ -125,7 +125,7 @@ export default buildConfig({
     NewsletterSubscribers,
     Pages,
   ],
-  storage: [
+  plugins: [
     s3Storage({
       enabled: supabaseStorageConfigured,
       acl: null as any,
