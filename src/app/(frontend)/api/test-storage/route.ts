@@ -1,5 +1,7 @@
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 import { NextResponse } from 'next/server'
+import { getPayload } from 'payload'
+import config from '@/payload.config'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,54 +26,75 @@ export async function GET() {
     secretAccessKeyLength: secretAccessKey ? secretAccessKey.length : 0,
   }
 
-  if (!endpoint || !accessKeyId || !secretAccessKey) {
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Variáveis de ambiente do Supabase Storage incompletas na Hostinger.',
-        diagnostics,
-      },
-      { status: 400 },
-    )
-  }
-
+  // Step 1: Test Direct S3
+  let directS3Result = 'not-run'
   try {
     const s3 = new S3Client({
       endpoint,
       forcePathStyle: true,
       region,
       credentials: {
-        accessKeyId: accessKeyId,
-        secretAccessKey: secretAccessKey,
+        accessKeyId: accessKeyId || '',
+        secretAccessKey: secretAccessKey || '',
       },
     })
-
     await s3.send(
       new PutObjectCommand({
         Bucket: bucket,
-        Key: 'test-connection.txt',
-        Body: 'teste de conexao ok',
+        Key: 'test-direct-s3.txt',
+        Body: 'ok',
         ContentType: 'text/plain',
       }),
     )
-
-    return NextResponse.json({
-      success: true,
-      message: 'Conexão e upload com o Supabase Storage S3 funcionaram perfeitamente!',
-      diagnostics,
-    })
+    directS3Result = 'success'
   } catch (err: unknown) {
-    const error = err as { name?: string; message?: string; Code?: string; $metadata?: { httpStatusCode?: number } }
-    return NextResponse.json(
-      {
-        success: false,
-        errorName: error.name || 'UnknownError',
-        errorMessage: error.message || String(err),
-        errorCode: error.Code || error.$metadata?.httpStatusCode,
-        diagnostics,
-      },
-      { status: 500 },
-    )
+    const error = err as { name?: string; message?: string }
+    directS3Result = `failed: ${error.name} - ${error.message}`
   }
+
+  // Step 2: Test Payload create on Media collection
+  let payloadCreateResult: unknown = null
+  let payloadCreateError: unknown = null
+  try {
+    const payload = await getPayload({ config })
+    const valid1x1Jpeg = Buffer.from(
+      '/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=',
+      'base64',
+    )
+    const result = await payload.create({
+      collection: 'media',
+      data: {
+        alt: 'Teste de diagnóstico automático',
+      },
+      file: {
+        data: valid1x1Jpeg,
+        name: 'teste-diagnostico.jpg',
+        mimetype: 'image/jpeg',
+        size: valid1x1Jpeg.length,
+      },
+      overrideAccess: true,
+    })
+    payloadCreateResult = {
+      id: result.id,
+      url: result.url,
+      filename: result.filename,
+    }
+  } catch (err: unknown) {
+    const error = err as { name?: string; message?: string; stack?: string; errors?: unknown[] }
+    payloadCreateError = {
+      name: error.name || 'Error',
+      message: error.message,
+      stack: error.stack,
+      errors: error.errors,
+    }
+  }
+
+  return NextResponse.json({
+    diagnostics,
+    directS3Result,
+    payloadCreateResult,
+    payloadCreateError,
+  })
 }
+
 

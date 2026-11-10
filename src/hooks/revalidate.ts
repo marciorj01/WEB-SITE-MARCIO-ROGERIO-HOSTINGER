@@ -11,25 +11,26 @@ async function invalidate(req: PayloadRequest, tags: ContentTag[], paths: string
   try {
     for (const tag of tags) revalidateTag(tag, { expire: 0 })
     for (const path of paths) revalidatePath(path, path === '/' ? 'layout' : 'page')
-  } catch (error) {
-    // CLI writes run outside Next's request store; notify the same app securely.
-    if (
-      !(error instanceof Error) ||
-      !/static generation store|incremental cache|request store|work store/i.test(error.message)
-    )
-      throw error
-    const body = JSON.stringify({ tags, paths, timestamp: Date.now() })
-    const origin = process.env.REVALIDATION_ORIGIN || `http://127.0.0.1:${process.env.PORT || 3000}`
-    const response = await fetch(`${origin}/api/revalidate-content`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Content-Signature': signRevalidation(body, req.payload.config.secret),
-      },
-      body,
-      signal: AbortSignal.timeout(20000),
-    })
-    if (!response.ok) throw new Error(`Content cache invalidation failed (${response.status})`)
+  } catch {
+    // If running outside request store, notify revalidation endpoint non-blockingly
+    try {
+      const body = JSON.stringify({ tags, paths, timestamp: Date.now() })
+      const origin =
+        process.env.REVALIDATION_ORIGIN ||
+        process.env.NEXT_PUBLIC_SITE_URL ||
+        `http://127.0.0.1:${process.env.PORT || 3000}`
+      await fetch(`${origin}/api/revalidate-content`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Content-Signature': signRevalidation(body, req.payload.config.secret),
+        },
+        body,
+        signal: AbortSignal.timeout(5000),
+      })
+    } catch {
+      // Revalidation warning should never block document creation or media upload
+    }
   }
 }
 
