@@ -26,7 +26,7 @@ export async function GET() {
     secretAccessKeyLength: secretAccessKey ? secretAccessKey.length : 0,
   }
 
-  // Step 1: Test Direct S3
+  // Step 1: Test Direct S3 without ACL
   let directS3Result = 'not-run'
   try {
     const s3 = new S3Client({
@@ -50,6 +50,48 @@ export async function GET() {
   } catch (err: unknown) {
     const error = err as { name?: string; message?: string }
     directS3Result = `failed: ${error.name} - ${error.message}`
+  }
+
+  // Step 1B: Test Direct S3 WITH ACL 'public-read' (Supabase often rejects ACLs)
+  let s3WithAclResult = 'not-run'
+  try {
+    const s3 = new S3Client({
+      endpoint,
+      forcePathStyle: true,
+      region,
+      credentials: {
+        accessKeyId: accessKeyId || '',
+        secretAccessKey: secretAccessKey || '',
+      },
+    })
+    await s3.send(
+      new PutObjectCommand({
+        Bucket: bucket,
+        Key: 'test-acl.txt',
+        Body: 'ok acl',
+        ContentType: 'text/plain',
+        ACL: 'public-read',
+      }),
+    )
+    s3WithAclResult = 'success'
+  } catch (err: unknown) {
+    const error = err as { name?: string; message?: string; Code?: string; $metadata?: { httpStatusCode?: number } }
+    s3WithAclResult = `failed: ${error.name} - ${error.message} (${error.Code || error.$metadata?.httpStatusCode})`
+  }
+
+  // Step 1C: Test Sharp image processing on Linux
+  let sharpResult = 'not-run'
+  try {
+    const sharp = (await import('sharp')).default
+    const testBuffer = Buffer.from(
+      '/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=',
+      'base64',
+    )
+    const meta = await sharp(testBuffer).metadata()
+    sharpResult = `success: format=${meta.format}, width=${meta.width}, height=${meta.height}`
+  } catch (err: unknown) {
+    const error = err as { name?: string; message?: string }
+    sharpResult = `failed: ${error.name} - ${error.message}`
   }
 
   // Step 2: Test Payload create on Media collection
@@ -80,18 +122,26 @@ export async function GET() {
       filename: result.filename,
     }
   } catch (err: unknown) {
-    const error = err as { name?: string; message?: string; stack?: string; errors?: unknown[] }
+    const error = err as any
     payloadCreateError = {
-      name: error.name || 'Error',
-      message: error.message,
-      stack: error.stack,
-      errors: error.errors,
+      name: error?.name || 'Error',
+      message: error?.message,
+      cause: error?.cause ? {
+        name: error.cause?.name,
+        message: error.cause?.message,
+        code: error.cause?.code || error.cause?.Code,
+        status: error.cause?.$metadata?.httpStatusCode,
+      } : null,
+      errors: error?.errors,
+      stack: error?.stack?.split('\n').slice(0, 5),
     }
   }
 
   return NextResponse.json({
     diagnostics,
     directS3Result,
+    s3WithAclResult,
+    sharpResult,
     payloadCreateResult,
     payloadCreateError,
   })

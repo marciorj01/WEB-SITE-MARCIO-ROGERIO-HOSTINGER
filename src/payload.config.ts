@@ -128,6 +128,7 @@ export default buildConfig({
   storage: [
     s3Storage({
       enabled: supabaseStorageConfigured,
+      acl: null as any,
       collections: {
         media: {
           disableLocalStorage: true,
