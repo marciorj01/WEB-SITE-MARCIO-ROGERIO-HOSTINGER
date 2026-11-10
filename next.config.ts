@@ -57,29 +57,29 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   images: process.env.FIGMA_PUBLIC_URL
     ? {
-        loader: 'custom',
-        loaderFile: './figma-image-loader.ts',
-      }
+      loader: 'custom',
+      loaderFile: './figma-image-loader.ts',
+    }
     : {
-        remotePatterns: [
-          {
-            protocol: 'https',
-            hostname: '**.supabase.co',
-          },
-          {
-            protocol: 'https',
-            hostname: '**.storage.supabase.co',
-          },
-          {
-            protocol: 'https',
-            hostname: '**.hostingersite.com',
-          },
-          {
-            protocol: 'https',
-            hostname: 'images.unsplash.com',
-          },
-        ],
-      },
+      remotePatterns: [
+        {
+          protocol: 'https',
+          hostname: '**.supabase.co',
+        },
+        {
+          protocol: 'https',
+          hostname: '**.storage.supabase.co',
+        },
+        {
+          protocol: 'https',
+          hostname: '**.hostingersite.com',
+        },
+        {
+          protocol: 'https',
+          hostname: 'images.unsplash.com',
+        },
+      ],
+    },
   // Don't block publishing or preview deploys on errors if the emitted JS is valid
   typescript: {
     ignoreBuildErrors: true,

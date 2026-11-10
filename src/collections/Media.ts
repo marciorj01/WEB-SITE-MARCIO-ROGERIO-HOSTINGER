@@ -12,7 +12,26 @@ export const Media: CollectionConfig = {
     update: adminOnly,
     delete: adminOnly,
   },
-  hooks: { afterChange: [revalidateShared], afterDelete: [revalidateSharedDelete] },
+  hooks: {
+    beforeOperation: [
+      ({ req, operation }) => {
+        if ((operation === 'create' || operation === 'update') && req.file) {
+          const parts = req.file.name.split('.')
+          const ext = parts.length > 1 ? `.${parts.pop()}` : ''
+          const name = parts.join('.')
+          const cleanName = name
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '')
+          req.file.name = `${cleanName || 'arquivo'}${ext.toLowerCase()}`
+        }
+      },
+    ],
+    afterChange: [revalidateShared],
+    afterDelete: [revalidateSharedDelete],
+  },
   fields: [
     {
       name: 'alt',
@@ -24,18 +43,6 @@ export const Media: CollectionConfig = {
   ],
   upload: {
     staticDir: 'public/media',
-    formatFileName: (fileName: string) => {
-      const parts = fileName.split('.')
-      const ext = parts.length > 1 ? `.${parts.pop()}` : ''
-      const name = parts.join('.')
-      const cleanName = name
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '')
-      return `${cleanName || 'arquivo'}${ext.toLowerCase()}`
-    },
     modifyResponseHeaders: ({ headers }) => {
       headers.set('Cache-Control', 'public, max-age=3600, s-maxage=3600')
       return headers
