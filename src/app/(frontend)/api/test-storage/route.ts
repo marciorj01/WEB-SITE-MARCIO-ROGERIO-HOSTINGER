@@ -123,9 +123,21 @@ export async function GET() {
     }
   } catch (err: unknown) {
     const error = err as any
+    const rawProps: Record<string, unknown> = {}
+    if (error && typeof error === 'object') {
+      for (const key of Object.getOwnPropertyNames(error)) {
+        try {
+          rawProps[key] = error[key]
+        } catch {
+          rawProps[key] = 'unserializable'
+        }
+      }
+    }
     payloadCreateError = {
       name: error?.name || 'Error',
       message: error?.message,
+      data: error?.data,
+      originalError: error?.data?.originalError ? String(error.data.originalError?.message || error.data.originalError) : null,
       cause: error?.cause ? {
         name: error.cause?.name,
         message: error.cause?.message,
@@ -133,7 +145,8 @@ export async function GET() {
         status: error.cause?.$metadata?.httpStatusCode,
       } : null,
       errors: error?.errors,
-      stack: error?.stack?.split('\n').slice(0, 5),
+      stack: error?.stack?.split('\n').slice(0, 10),
+      rawProps,
     }
   }
 

@@ -125,20 +125,12 @@ export default buildConfig({
     NewsletterSubscribers,
     Pages,
   ],
-  plugins: [
+  storage: [
     s3Storage({
       enabled: supabaseStorageConfigured,
-      acl: null as any,
       collections: {
         media: {
           disableLocalStorage: true,
-          generateFileURL: ({ filename }) => {
-            const projectRef = s3Endpoint?.replace(/^https?:\/\//, '').split('.')[0]
-            if (projectRef) {
-              return `https://${projectRef}.supabase.co/storage/v1/object/public/${s3Bucket}/${filename}`
-            }
-            return `${s3Endpoint}/${s3Bucket}/${filename}`
-          },
         },
       },
       bucket: s3Bucket,

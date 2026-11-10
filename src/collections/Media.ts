@@ -13,41 +13,6 @@ export const Media: CollectionConfig = {
     delete: adminOnly,
   },
   hooks: {
-    beforeOperation: [
-      ({ args, operation, req }) => {
-        const file = (req as any)?.file
-        if ((operation === 'create' || operation === 'update') && file?.name) {
-          const parts = file.name.split('.')
-          const ext = parts.length > 1 ? `.${parts.pop()}` : ''
-          const name = parts.join('.')
-          const cleanName = name
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/^-+|-+$/g, '')
-          file.name = `${cleanName || 'arquivo'}${ext.toLowerCase()}`
-        }
-        return args
-      },
-    ],
-    beforeChange: [
-      ({ data }) => {
-        if (data?.filename) {
-          const parts = data.filename.split('.')
-          const ext = parts.length > 1 ? `.${parts.pop()}` : ''
-          const name = parts.join('.')
-          const cleanName = name
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/^-+|-+$/g, '')
-          data.filename = `${cleanName || 'arquivo'}${ext.toLowerCase()}`
-        }
-        return data
-      },
-    ],
     afterChange: [revalidateShared],
     afterDelete: [revalidateSharedDelete],
   },
@@ -61,6 +26,7 @@ export const Media: CollectionConfig = {
     createTagField({ relationTo: 'tags' }),
   ],
   upload: {
+    disableLocalStorage: true,
     modifyResponseHeaders: ({ headers }) => {
       headers.set('Cache-Control', 'public, max-age=3600, s-maxage=3600')
       return headers
