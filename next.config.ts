@@ -75,6 +75,14 @@ const nextConfig: NextConfig = {
         },
         {
           protocol: 'https',
+          hostname: '**.marciorjcorretor.com.br',
+        },
+        {
+          protocol: 'https',
+          hostname: 'marciorjcorretor.com.br',
+        },
+        {
+          protocol: 'https',
           hostname: 'images.unsplash.com',
         },
       ],

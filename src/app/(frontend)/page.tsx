@@ -1,4 +1,3 @@
-import { renderVisualPage } from '@/components/visual-page'
 import Link from 'next/link'
 import { getArticles, getBrand, getProperties } from '@/lib/content'
 import { HomeHero } from '@/components/hero'
@@ -17,8 +16,6 @@ import {
 } from '@/components/ui'
 
 export default async function HomePage() {
-  const visualPage = await renderVisualPage('/')
-  if (visualPage) return visualPage
   const [brand, properties, articles] = await Promise.all([
     getBrand(),
     getProperties(),

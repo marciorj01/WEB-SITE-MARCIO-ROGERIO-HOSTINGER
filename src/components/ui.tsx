@@ -110,9 +110,19 @@ export function MediaImage({
         <span className="font-display text-4xl text-navy/30">MR</span>
       </div>
     )
+
+  let src = media.url
+  if (typeof src === 'string') {
+    // Corrige URL do endpoint S3 privado do Supabase para o endpoint público CDN
+    src = src.replace(
+      /https:\/\/([a-z0-9_-]+)\.storage\.supabase\.co\/storage\/v1\/s3\/([^/]+)\/(.+)$/i,
+      'https://$1.supabase.co/storage/v1/object/public/$2/$3',
+    )
+  }
+
   return (
     <Image
-      src={media.url}
+      src={src}
       alt={alt ?? media.alt}
       fill
       sizes={sizes}

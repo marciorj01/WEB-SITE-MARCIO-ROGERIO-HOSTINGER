@@ -109,6 +109,15 @@ if (!supabaseStorageConfigured) {
   )
 }
 
+function getSupabasePublicUrl(endpoint?: string, bucket = 'site-media', fileKey = ''): string {
+  if (!endpoint) return `/api/media/file/${fileKey}`
+  const match = endpoint.match(/https:\/\/([a-z0-9_-]+)\.storage\.supabase\.co/i)
+  if (match) {
+    return `https://${match[1]}.supabase.co/storage/v1/object/public/${bucket}/${fileKey}`
+  }
+  return `${endpoint}/${bucket}/${fileKey}`
+}
+
 export default buildConfig({
   serverURL: siteURL,
   cors: allowedCmsOrigins,
@@ -162,7 +171,12 @@ export default buildConfig({
     s3Storage({
       enabled: supabaseStorageConfigured,
       collections: {
-        media: true,
+        media: {
+          generateFileURL: ({ filename, prefix }) => {
+            const fileKey = prefix ? `${prefix}/${filename}` : filename
+            return getSupabasePublicUrl(s3Endpoint, s3Bucket, fileKey)
+          },
+        },
       },
       bucket: s3Bucket,
       config: {
