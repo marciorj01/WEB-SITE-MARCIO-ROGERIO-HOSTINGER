@@ -80,7 +80,7 @@ const supabaseStorageConfigured = Boolean(
 )
 
 export default buildConfig({
-  serverURL: process.env.NEXT_PUBLIC_SITE_URL || 'https://red-hyena-420447.hostingersite.com',
+  serverURL: process.env.SERVER_URL || 'https://red-hyena-420447.hostingersite.com',
   secret: process.env.PAYLOAD_SECRET || 'marcio-rogerio-secret-dev-key-2026-payload',
   db: databaseAdapter,
   editor: lexicalEditor(),
@@ -95,7 +95,7 @@ export default buildConfig({
       ],
       url: ({ data, req }) => {
         const path = typeof data.path === 'string' ? data.path : '/'
-        const base = process.env.NEXT_PUBLIC_SITE_URL || req.origin
+        const base = req.origin || 'https://red-hyena-420447.hostingersite.com'
         if (req.user?.collection !== Admins.slug) return undefined
         const expires = Date.now() + 5 * 60 * 1000
         const secret = process.env.PAYLOAD_SECRET || 'marcio-rogerio-secret-dev-key-2026-payload'
