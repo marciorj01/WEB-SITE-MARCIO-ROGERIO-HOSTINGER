@@ -4,13 +4,13 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "NODE_OPTIONS=--no-deprecation next dev --port ${PORT:-3000} --hostname 0.0.0.0",
-    "build": "NODE_OPTIONS=--no-deprecation payload migrate && NODE_OPTIONS=--no-deprecation payload build --webpack",
-    "start": "NODE_OPTIONS=--no-deprecation next start",
+    "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev --port 3000",
+    "build": "cross-env NODE_OPTIONS=--no-deprecation payload migrate && cross-env NODE_OPTIONS=--no-deprecation payload build --webpack",
+    "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
     "format": "oxfmt",
-    "generate:importmap": "NODE_OPTIONS=--no-deprecation payload generate:importmap",
-    "generate:types": "NODE_OPTIONS=--no-deprecation payload generate:types",
-    "payload": "NODE_OPTIONS=--no-deprecation payload"
+    "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
+    "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
+    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "4.0.0-beta.6",
@@ -24,6 +24,7 @@
     "@payloadcms/storage-s3": "4.0.0-beta.6",
     "@payloadcms/translations": "4.0.0-beta.6",
     "@payloadcms/ui": "4.0.0-beta.6",
+    "cross-env": "^7.0.3",
     "graphql": "^16.8.1",
     "html-react-parser": "^5.2.10",
     "monaco-editor": "0.55.1",

@@ -1,5 +1,8 @@
+import 'server-only'
 import { unstable_cache } from 'next/cache'
 import { getPayloadClient } from '@/lib/payload'
+
+const published = { _status: { equals: 'published' } } as const
 
 export const getBrand = unstable_cache(
   async () => {
@@ -13,15 +16,15 @@ export const getBrand = unstable_cache(
 export const getProperties = unstable_cache(
   async () => {
     const payload = await getPayloadClient()
-    const result = await payload.find({
+    const { docs } = await payload.find({
       collection: 'properties',
       depth: 2,
-      limit: 100,
+      pagination: false,
       sort: 'order',
       overrideAccess: false,
-      where: { _status: { equals: 'published' } },
+      where: published,
     })
-    return result.docs
+    return docs
   },
   ['properties-list'],
   { tags: ['properties', 'media'] },
@@ -30,15 +33,15 @@ export const getProperties = unstable_cache(
 export const getArticles = unstable_cache(
   async () => {
     const payload = await getPayloadClient()
-    const result = await payload.find({
+    const { docs } = await payload.find({
       collection: 'articles',
       depth: 2,
-      limit: 100,
+      pagination: false,
       sort: 'order',
       overrideAccess: false,
-      where: { _status: { equals: 'published' } },
+      where: published,
     })
-    return result.docs
+    return docs
   },
   ['articles-list'],
   { tags: ['articles', 'categories', 'authors', 'media'] },
@@ -47,15 +50,14 @@ export const getArticles = unstable_cache(
 export const getCategories = unstable_cache(
   async () => {
     const payload = await getPayloadClient()
-    return (
-      await payload.find({
-        collection: 'categories',
-        depth: 0,
-        limit: 100,
-        sort: 'order',
-        overrideAccess: false,
-      })
-    ).docs
+    const { docs } = await payload.find({
+      collection: 'categories',
+      depth: 0,
+      pagination: false,
+      sort: 'order',
+      overrideAccess: false,
+    })
+    return docs
   },
   ['categories-list'],
   { tags: ['categories'] },
@@ -64,16 +66,15 @@ export const getCategories = unstable_cache(
 export const getDevelopments = unstable_cache(
   async () => {
     const payload = await getPayloadClient()
-    return (
-      await payload.find({
-        collection: 'developments',
-        depth: 2,
-        limit: 100,
-        sort: 'order',
-        overrideAccess: false,
-        where: { _status: { equals: 'published' } },
-      })
-    ).docs
+    const { docs } = await payload.find({
+      collection: 'developments',
+      depth: 2,
+      pagination: false,
+      sort: 'order',
+      overrideAccess: false,
+      where: published,
+    })
+    return docs
   },
   ['developments-list'],
   { tags: ['developments', 'media'] },
