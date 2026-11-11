@@ -17,3 +17,4 @@ export async function down({ db }: MigrateDownArgs): Promise<void> {
     ALTER TABLE "_media_v" DROP COLUMN IF EXISTS "version__objectkey";
   `)
 }
+
