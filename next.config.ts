@@ -34,7 +34,6 @@ const allowedHostOrigins = [
   '127.0.0.1:3000',
   'www.marciorjcorretor.com.br',
   'marciorjcorretor.com.br',
-  'marciorjcorretor.netlify.app',
   'red-hyena-420447.hostingersite.com',
   '*.hostingersite.com',
   ...(makePublicPreviewOrigin ? [makePublicPreviewOrigin] : []),

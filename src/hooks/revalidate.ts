@@ -10,7 +10,7 @@ import { signRevalidation, type ContentTag } from '@/lib/revalidation'
 async function invalidate(req: PayloadRequest, tags: ContentTag[], paths: string[]) {
   try {
     for (const tag of tags) revalidateTag(tag, { expire: 0 })
-    for (const path of paths) revalidatePath(path, path === '/' ? 'layout' : 'page')
+    for (const path of paths) revalidatePath(path)
   } catch {
     // If running outside request store, notify revalidation endpoint non-blockingly
     try {

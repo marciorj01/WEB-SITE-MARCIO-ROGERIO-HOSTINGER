@@ -44,7 +44,7 @@ const databaseAdapter = databaseUri
   ? postgresAdapter({
       pool: {
         connectionString: databaseUri,
-        max: 1,
+        max: 10,
         ssl: {
           rejectUnauthorized: false,
         },
@@ -83,7 +83,8 @@ function normalizeOrigin(value?: string): string | undefined {
 
 const siteURL =
   normalizeOrigin(process.env.SERVER_URL) ||
-  'https://red-hyena-420447.hostingersite.com'
+  normalizeOrigin(process.env.NEXT_PUBLIC_SITE_URL) ||
+  'https://www.marciorjcorretor.com.br'
 
 const allowedCmsOrigins = [
   ...new Set([
@@ -93,7 +94,7 @@ const allowedCmsOrigins = [
     'https://red-hyena-420447.hostingersite.com',
     'http://localhost:3000',
     'http://127.0.0.1:3000',
-  ]),
+  ].filter((origin): origin is string => Boolean(origin))),
 ]
 
 if (!databaseUri) {

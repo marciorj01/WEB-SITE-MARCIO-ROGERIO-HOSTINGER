@@ -1,8 +1,41 @@
-import type { CollectionBeforeValidateHook, CollectionConfig } from 'payload'
+import type {
+  CollectionBeforeOperationHook,
+  CollectionBeforeValidateHook,
+  CollectionConfig,
+} from 'payload'
 
 import { createFolderField, createTagField } from 'payload'
 import { adminOnly } from '@/access'
 import { revalidateShared, revalidateSharedDelete } from '@/hooks/revalidate'
+
+function sanitizeFilename(filename: string): string {
+  const extIndex = filename.lastIndexOf('.')
+  const ext = extIndex !== -1 ? filename.slice(extIndex).toLowerCase() : ''
+  const baseName = extIndex !== -1 ? filename.slice(0, extIndex) : filename
+
+  const cleanBase = baseName
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9_-]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .toLowerCase()
+
+  return `${cleanBase || 'arquivo'}${ext}`
+}
+
+const sanitizeUploadedFile: CollectionBeforeOperationHook = ({ args, operation, req }) => {
+  if (operation === 'create' || operation === 'update') {
+    const file = req.file as { name?: string; filename?: string } | undefined
+    if (file?.name) {
+      file.name = sanitizeFilename(file.name)
+    }
+    if (file?.filename) {
+      file.filename = sanitizeFilename(file.filename)
+    }
+  }
+  return args
+}
 
 const ensureAlt: CollectionBeforeValidateHook = ({ data, req }) => {
   if (!data || typeof data !== 'object') return data
@@ -20,6 +53,11 @@ const ensureAlt: CollectionBeforeValidateHook = ({ data, req }) => {
     (typeof record.filename === 'string' ? record.filename : '')
   const label = rawName.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').trim()
   record.alt = label || 'Imagem'
+
+  if (typeof record.filename === 'string') {
+    record.filename = sanitizeFilename(record.filename)
+  }
+
   return data
 }
 
@@ -33,6 +71,7 @@ export const Media: CollectionConfig = {
     delete: adminOnly,
   },
   hooks: {
+    beforeOperation: [sanitizeUploadedFile],
     beforeValidate: [ensureAlt],
     afterChange: [revalidateShared],
     afterDelete: [revalidateSharedDelete],
