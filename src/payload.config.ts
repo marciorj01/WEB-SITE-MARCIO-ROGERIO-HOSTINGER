@@ -80,6 +80,7 @@ const supabaseStorageConfigured = Boolean(
 )
 
 export default buildConfig({
+  serverURL: process.env.NEXT_PUBLIC_SITE_URL || 'https://red-hyena-420447.hostingersite.com',
   secret: process.env.PAYLOAD_SECRET || 'marcio-rogerio-secret-dev-key-2026-payload',
   db: databaseAdapter,
   editor: lexicalEditor(),

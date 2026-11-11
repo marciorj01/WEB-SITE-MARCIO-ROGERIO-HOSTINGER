@@ -97,8 +97,28 @@ export async function GET() {
   // Step 2: Test Payload create on Media collection
   let payloadCreateResult: unknown = null
   let payloadCreateError: unknown = null
+  const interceptedLogs: string[] = []
+  const originalConsoleError = console.error
+  const originalConsoleWarn = console.warn
+  console.error = (...args: any[]) => {
+    interceptedLogs.push('[console.error] ' + args.map(a => typeof a === 'object' ? JSON.stringify(a, Object.getOwnPropertyNames(a)) : String(a)).join(' '))
+    originalConsoleError(...args)
+  }
+  console.warn = (...args: any[]) => {
+    interceptedLogs.push('[console.warn] ' + args.map(a => typeof a === 'object' ? JSON.stringify(a, Object.getOwnPropertyNames(a)) : String(a)).join(' '))
+    originalConsoleWarn(...args)
+  }
+
   try {
     const payload = await getPayload({ config })
+    const origLoggerError = (payload.logger as any)?.error?.bind(payload.logger)
+    if (origLoggerError) {
+      (payload.logger as any).error = (...args: any[]) => {
+        interceptedLogs.push('[payload.logger.error] ' + args.map(a => typeof a === 'object' ? JSON.stringify(a, Object.getOwnPropertyNames(a)) : String(a)).join(' '))
+        origLoggerError(...args)
+      }
+    }
+
     const valid1x1Jpeg = Buffer.from(
       '/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=',
       'base64',
@@ -147,7 +167,11 @@ export async function GET() {
       errors: error?.errors,
       stack: error?.stack?.split('\n').slice(0, 10),
       rawProps,
+      interceptedLogs,
     }
+  } finally {
+    console.error = originalConsoleError
+    console.warn = originalConsoleWarn
   }
 
   return NextResponse.json({
@@ -157,6 +181,7 @@ export async function GET() {
     sharpResult,
     payloadCreateResult,
     payloadCreateError,
+    interceptedLogs,
   })
 }
 
