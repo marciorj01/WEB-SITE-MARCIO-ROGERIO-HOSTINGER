@@ -71,16 +71,47 @@ const s3Region = process.env.SUPABASE_STORAGE_S3_REGION?.trim() || 'sa-east-1'
 const s3AccessKeyId = process.env.SUPABASE_STORAGE_S3_ACCESS_KEY_ID?.trim()
 const s3SecretAccessKey = process.env.SUPABASE_STORAGE_S3_SECRET_ACCESS_KEY?.trim()
 
-const supabaseStorageConfigured = Boolean(
-  s3Bucket &&
-    s3Endpoint &&
-    s3Region &&
-    s3AccessKeyId &&
-    s3SecretAccessKey,
-)
+const supabaseStorageConfigured = Boolean(s3Endpoint && s3AccessKeyId && s3SecretAccessKey)
+
+function normalizeOrigin(value?: string): string | undefined {
+  if (!value) return undefined
+  const trimmed = value.trim().replace(/\/$/, '')
+  if (!trimmed) return undefined
+  if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) return `https://${trimmed}`
+  return trimmed
+}
+
+const siteURL =
+  normalizeOrigin(process.env.SERVER_URL) ||
+  'https://red-hyena-420447.hostingersite.com'
+
+const allowedCmsOrigins = [
+  ...new Set([
+    siteURL,
+    'https://www.marciorjcorretor.com.br',
+    'https://marciorjcorretor.com.br',
+    'https://red-hyena-420447.hostingersite.com',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+  ]),
+]
+
+if (!databaseUri) {
+  console.warn(
+    '[payload] DATABASE_URI ausente. As migrações vão para um SQLite local e as fotos não entram no Postgres do site.',
+  )
+}
+
+if (!supabaseStorageConfigured) {
+  console.warn(
+    '[media] Supabase Storage desligado. Defina SUPABASE_STORAGE_S3_ENDPOINT, SUPABASE_STORAGE_S3_ACCESS_KEY_ID e SUPABASE_STORAGE_S3_SECRET_ACCESS_KEY no ambiente da Hostinger.',
+  )
+}
 
 export default buildConfig({
-  serverURL: process.env.SERVER_URL || 'https://red-hyena-420447.hostingersite.com',
+  serverURL: siteURL,
+  cors: allowedCmsOrigins,
+  csrf: allowedCmsOrigins,
   secret: process.env.PAYLOAD_SECRET || 'marcio-rogerio-secret-dev-key-2026-payload',
   db: databaseAdapter,
   editor: lexicalEditor(),
@@ -95,7 +126,7 @@ export default buildConfig({
       ],
       url: ({ data, req }) => {
         const path = typeof data.path === 'string' ? data.path : '/'
-        const base = req.origin || 'https://red-hyena-420447.hostingersite.com'
+        const base = req.origin || siteURL
         if (req.user?.collection !== Admins.slug) return undefined
         const expires = Date.now() + 5 * 60 * 1000
         const secret = process.env.PAYLOAD_SECRET || 'marcio-rogerio-secret-dev-key-2026-payload'
@@ -130,9 +161,7 @@ export default buildConfig({
     s3Storage({
       enabled: supabaseStorageConfigured,
       collections: {
-        media: {
-          disableLocalStorage: true,
-        },
+        media: true,
       },
       bucket: s3Bucket,
       config: {

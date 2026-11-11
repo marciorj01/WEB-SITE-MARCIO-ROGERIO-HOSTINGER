@@ -53,7 +53,7 @@ Você pode cadastrar até 6 slides que o visitante pode navegar pelas setas:
 O menu **Media** (segundo item no topo do menu lateral) funciona como a sua biblioteca geral de arquivos:
 * **Para subir arquivos em lote:** Clique em **Media** > botão azul **Criar Novo**;
 * Você pode subir imagens (JPG, PNG, WEBP) e vídeos (MP4);
-* Ao enviar, preencha o campo **Alt** com uma breve descrição (ex: *"Fachada Edifício Horizonte"*);
+* O texto alternativo pode ficar em branco: o nome do arquivo entra no lugar, e a foto consegue ser salva. Se quiser, preencha **Alt** com uma breve descrição (ex: *"Fachada Edifício Horizonte"*);
 * Uma vez na biblioteca, você pode reutilizar a mesma foto ou vídeo em qualquer imóvel, banner ou artigo sem precisar subir de novo.
 
 ---
