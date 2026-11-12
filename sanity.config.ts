@@ -1,5 +1,6 @@
 import { defineConfig } from 'sanity'
 import { structureTool } from 'sanity/structure'
+import { presentationTool } from 'sanity/presentation'
 import { schemaTypes } from './src/sanity/schemaTypes'
 import { projectId, dataset } from './src/sanity/env'
 
@@ -9,9 +10,18 @@ export default defineConfig({
   title: 'Marcio Rogério — Gestão de Imóveis',
   projectId,
   dataset,
-  plugins: [structureTool()],
+  plugins: [
+    presentationTool({
+      title: 'Visual (Ao Vivo)',
+      previewUrl: {
+        preview: '/',
+      },
+    }),
+    structureTool({
+      title: 'Formulários',
+    }),
+  ],
   schema: {
     types: schemaTypes,
   },
 })
-
