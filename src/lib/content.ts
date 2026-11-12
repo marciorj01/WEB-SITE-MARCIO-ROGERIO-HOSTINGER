@@ -1,5 +1,6 @@
 import type { Article, Brand, Category, Development, Property } from '@/types/content'
 import { fetchStrapi, isStrapiConfigured } from '@/lib/strapi'
+import { getSanityProperties, getSanityPropertyBySlug } from '@/sanity/queries'
 
 export const DEFAULT_BRAND: Brand = {
   name: 'Marcio Rogério',
@@ -247,20 +248,38 @@ export async function getBrand(): Promise<Brand> {
 }
 
 export async function getProperties(): Promise<Property[]> {
+  // 1. Prioriza dados do Sanity.io se houver imóveis cadastrados
+  const sanityProperties = await getSanityProperties()
+  if (sanityProperties && sanityProperties.length > 0) {
+    return sanityProperties
+  }
+
+  // 2. Tenta Strapi se configurado
   if (isStrapiConfigured()) {
     const data = await fetchStrapi<Property[]>('/properties?populate=*')
     if (data && Array.isArray(data) && data.length > 0) return data
   }
+
+  // 3. Fallback gracioso para dados locais de exemplo
   return DEFAULT_PROPERTIES
 }
 
 export async function getPropertyBySlug(slug: string): Promise<Property | null> {
+  // 1. Prioriza busca no Sanity.io
+  const sanityProperty = await getSanityPropertyBySlug(slug)
+  if (sanityProperty) {
+    return sanityProperty
+  }
+
+  // 2. Tenta Strapi se configurado
   if (isStrapiConfigured()) {
     const data = await fetchStrapi<Property[]>(
       `/properties?filters[slug][$eq]=${encodeURIComponent(slug)}&populate=*`,
     )
     if (data && Array.isArray(data) && data[0]) return data[0]
   }
+
+  // 3. Fallback gracioso para dados locais de exemplo
   const found = DEFAULT_PROPERTIES.find((p) => p.slug === slug)
   return found || null
 }

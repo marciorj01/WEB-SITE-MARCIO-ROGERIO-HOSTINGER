@@ -39,7 +39,7 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.resolve(dirname),
   },
-  output: 'standalone',
+  output: process.env.STANDALONE === 'true' ? 'standalone' : undefined,
   images: {
     remotePatterns: [
       {
