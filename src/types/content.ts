@@ -88,6 +88,7 @@ export interface Property {
   }[] | null
   tour360Url?: string | null
   videoUrl?: string | null
+  pdfUrl?: string | null
   segment: 'first' | 'medium' | 'high'
   type?: 'Casa' | 'Apartamento' | 'Studio' | 'Cobertura' | null
   location?: string | null
@@ -187,4 +188,14 @@ export interface NewsletterSubscriber {
   email: string
   consent: boolean
 }
+
+export interface Partner {
+  id: number | string
+  name: string
+  logoUrl?: string | null
+  url?: string | null
+  description?: string | null
+  order?: number | null
+}
+
 

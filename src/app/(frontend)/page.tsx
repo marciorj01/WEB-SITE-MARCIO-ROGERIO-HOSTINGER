@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getArticles, getBrand, getProperties } from '@/lib/content'
+import { getArticles, getBrand, getPartners, getProperties } from '@/lib/content'
 import { HomeHero } from '@/components/hero'
 import { PropertyCollection } from '@/components/collections'
 import { ArticleCard } from '@/components/cards'
@@ -16,10 +16,11 @@ import {
 } from '@/components/ui'
 
 export default async function HomePage() {
-  const [brand, properties, articles] = await Promise.all([
+  const [brand, properties, articles, partners] = await Promise.all([
     getBrand(),
     getProperties(),
     getArticles(),
+    getPartners(),
   ])
   const editorial = articles.filter((article) => article.format === 'article').slice(0, 4)
   return (
@@ -201,6 +202,43 @@ export default async function HomePage() {
           )}
         </div>
       </section>
+      {partners && partners.length > 0 && (
+        <section className="border-b border-line bg-ivory py-16">
+          <div className={container}>
+            <p className="mb-8 text-center text-[9px] uppercase tracking-[.25em] text-muted">
+              Parceiros Estratégicos & Portais Homologados
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-10 md:gap-16">
+              {partners.map((partner) => (
+                <a
+                  key={partner.id}
+                  href={partner.url || '#'}
+                  target={partner.url ? '_blank' : undefined}
+                  rel="noopener noreferrer"
+                  className="group flex flex-col items-center gap-1 opacity-70 transition-all duration-300 hover:opacity-100"
+                >
+                  {partner.logoUrl ? (
+                    <img
+                      src={partner.logoUrl}
+                      alt={partner.name}
+                      className="h-7 max-w-[130px] object-contain grayscale transition-all duration-300 group-hover:scale-105 group-hover:grayscale-0"
+                    />
+                  ) : (
+                    <span className="font-display text-xl tracking-wider text-navy transition-colors group-hover:text-gold-dark">
+                      {partner.name}
+                    </span>
+                  )}
+                  {partner.description && (
+                    <span className="text-[8px] uppercase tracking-[.15em] text-muted/75">
+                      {partner.description}
+                    </span>
+                  )}
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
       <Newsletter compact />
       <ContactCTA />
     </main>

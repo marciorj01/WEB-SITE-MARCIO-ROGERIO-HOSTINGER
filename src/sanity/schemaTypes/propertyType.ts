@@ -157,9 +157,24 @@ export const propertyType = defineType({
     }),
     defineField({
       name: 'videoUrl',
-      title: 'Link do Vídeo / Tour Virtual',
+      title: 'Link do Vídeo (YouTube ou Vimeo)',
       type: 'url',
-      description: 'Link do YouTube, Vimeo ou Tour 360 (ex: https://www.youtube.com/watch?v=...)',
+      description: 'Link do YouTube ou Vimeo (ex: https://www.youtube.com/watch?v=...)',
+    }),
+    defineField({
+      name: 'tour360Url',
+      title: 'Link do Tour Virtual 360°',
+      type: 'url',
+      description: 'Link interativo 360° / Matterport para o cliente navegar pelos ambientes',
+    }),
+    defineField({
+      name: 'brochurePdf',
+      title: 'Apresentação em PDF (Book do Imóvel)',
+      type: 'file',
+      description: 'Suba o arquivo PDF do imóvel para os clientes poderem baixar',
+      options: {
+        accept: '.pdf',
+      },
     }),
     defineField({
       name: 'description',

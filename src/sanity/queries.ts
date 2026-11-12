@@ -1,6 +1,6 @@
 import { groq } from 'next-sanity'
 import { client, isSanityConfigured } from './client'
-import type { Property } from '@/types/content'
+import type { Brand, Partner, Property } from '@/types/content'
 
 // GROQ Query para buscar todos os imóveis cadastrados
 export const propertiesQuery = groq`
@@ -24,6 +24,8 @@ export const propertiesQuery = groq`
     "coverImageUrl": mainImage.asset->url,
     "galleryUrls": gallery[].asset->url,
     videoUrl,
+    tour360Url,
+    "pdfUrl": brochurePdf.asset->url,
     description,
     features
   }
@@ -69,8 +71,60 @@ export const propertyBySlugQuery = groq`
     "coverImageUrl": mainImage.asset->url,
     "galleryUrls": gallery[].asset->url,
     videoUrl,
+    tour360Url,
+    "pdfUrl": brochurePdf.asset->url,
     description,
     features
+  }
+`
+
+// GROQ Query para buscar as configurações e textos da Home
+export const siteSettingsQuery = groq`
+  *[_type == "siteSettings"][0] {
+    name,
+    tagline,
+    whatsapp,
+    email,
+    professionalRegistration,
+    heroVideoUrl,
+    heroSlides[] {
+      "image": {
+        "url": image.asset->url,
+        "alt": caption
+      },
+      caption,
+      "mediaType": "image"
+    },
+    homeCollectionEyebrow,
+    homeCollectionTitle,
+    homeCollectionTitleEmphasis,
+    homeCollectionLinkLabel,
+    homeCollectionFooterText,
+    homeCollectionFooterEmphasis,
+    consultingEyebrow,
+    consultingTitle,
+    consultingTitleEmphasis,
+    consultingText,
+    consultingSecondaryText,
+    consultingLinkLabel,
+    "consultingImage": {
+      "url": consultingImage.asset->url,
+      "alt": consultingImageCaption
+    },
+    consultingImageEyebrow,
+    consultingImageCaption
+  }
+`
+
+// GROQ Query para buscar os parceiros estratégicos
+export const partnersQuery = groq`
+  *[_type == "partner"] | order(order asc, _createdAt desc) {
+    _id,
+    name,
+    "logoUrl": logo.asset->url,
+    url,
+    description,
+    order
   }
 `
 
@@ -104,6 +158,8 @@ function mapSanityToProperty(item: any, fallbackId: number | string): Property {
         }))
       : null,
     videoUrl: item.videoUrl || null,
+    tour360Url: item.tour360Url || null,
+    pdfUrl: item.pdfUrl || null,
     segment,
     type: (item.propertyType as any) || 'Apartamento',
     location: item.location || 'São Paulo',
@@ -161,6 +217,67 @@ export async function getSanityPropertyBySlug(slug: string): Promise<Property | 
     return mapSanityToProperty(item, slug)
   } catch (error) {
     console.warn(`Sanity: aviso ao consultar imóvel "${slug}" (usando fallback local):`, error)
+    return null
+  }
+}
+
+/**
+ * Função utilitária para buscar os textos e configurações da Home no Sanity
+ */
+export async function getSanityBrand(): Promise<Partial<Brand> | null> {
+  if (!isSanityConfigured()) return null
+
+  try {
+    const settings = await client.fetch<any>(
+      siteSettingsQuery,
+      {},
+      { next: { revalidate: 60 } },
+    )
+
+    if (!settings) return null
+
+    // Remove valores vazios para preservar fallbacks
+    const cleaned: any = {}
+    for (const [key, val] of Object.entries(settings)) {
+      if (val !== null && val !== undefined && val !== '') {
+        cleaned[key] = val
+      }
+    }
+
+    return cleaned
+  } catch (error) {
+    console.warn('Sanity: aviso ao consultar configurações da marca (usando fallback):', error)
+    return null
+  }
+}
+
+/**
+ * Função utilitária para buscar os parceiros estratégicos no Sanity
+ */
+export async function getSanityPartners(): Promise<Partner[] | null> {
+  if (!isSanityConfigured()) return null
+
+  try {
+    const raw = await client.fetch<any[]>(
+      partnersQuery,
+      {},
+      { next: { revalidate: 60 } },
+    )
+
+    if (!Array.isArray(raw) || raw.length === 0) {
+      return null
+    }
+
+    return raw.map((item, idx) => ({
+      id: item._id || idx + 1,
+      name: item.name,
+      logoUrl: item.logoUrl || null,
+      url: item.url || null,
+      description: item.description || null,
+      order: item.order ? Number(item.order) : idx + 1,
+    }))
+  } catch (error) {
+    console.warn('Sanity: aviso ao consultar parceiros (usando fallback):', error)
     return null
   }
 }

@@ -63,6 +63,17 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
               videoUrl={(property as any).videoUrl}
               title={property.title}
             />
+            {property.pdfUrl && (
+              <a
+                href={property.pdfUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group inline-flex items-center gap-2 border border-line bg-paper px-5 py-3 text-[11px] font-semibold tracking-[.04em] text-navy transition-all duration-300 hover:border-gold-dark hover:text-gold-dark"
+              >
+                <Icon name="download" className="size-3.5 text-gold-dark transition-transform group-hover:translate-y-0.5" />
+                Baixar Apresentação (PDF)
+              </a>
+            )}
             <ButtonLink href="#interesse" variant="outline">
               {property.referenceOnly ? 'Quero encontrar um imóvel assim' : 'Solicitar detalhes'}
             </ButtonLink>

@@ -1,6 +1,11 @@
-import type { Article, Brand, Category, Development, Property } from '@/types/content'
+import type { Article, Brand, Category, Development, Partner, Property } from '@/types/content'
 import { fetchStrapi, isStrapiConfigured } from '@/lib/strapi'
-import { getSanityProperties, getSanityPropertyBySlug } from '@/sanity/queries'
+import {
+  getSanityBrand,
+  getSanityPartners,
+  getSanityProperties,
+  getSanityPropertyBySlug,
+} from '@/sanity/queries'
 
 export const DEFAULT_BRAND: Brand = {
   name: 'Marcio Rogério',
@@ -234,17 +239,60 @@ export const DEFAULT_ARTICLES: Article[] = [
   },
 ]
 
+export const DEFAULT_PARTNERS: Partner[] = [
+  {
+    id: 1,
+    name: 'QuintoAndar',
+    description: 'Portal Homologado',
+    url: 'https://www.quintoandar.com.br',
+  },
+  {
+    id: 2,
+    name: 'Loft',
+    description: 'Parceria de Co-corretagem',
+    url: 'https://loft.com.br',
+  },
+  {
+    id: 3,
+    name: 'Zap Imóveis',
+    description: 'Divulgação em Grande Escala',
+    url: 'https://www.zapimoveis.com.br',
+  },
+  {
+    id: 4,
+    name: 'Viva Real',
+    description: 'Rede de Alcance Nacional',
+    url: 'https://www.vivareal.com.br',
+  },
+]
+
 /**
  * Funções de consulta de conteúdo
- * Desacopladas: tentam Strapi se configurado, ou retornam os dados locais.
+ * Desacopladas: priorizam Sanity.io, com fallback gracioso.
  */
 
 export async function getBrand(): Promise<Brand> {
+  // 1. Prioriza configurações e textos cadastrados no Sanity.io
+  const sanityBrand = await getSanityBrand()
+  if (sanityBrand) {
+    return { ...DEFAULT_BRAND, ...sanityBrand }
+  }
+
+  // 2. Tenta Strapi se configurado
   if (isStrapiConfigured()) {
     const data = await fetchStrapi<Brand>('/brand?populate=*')
     if (data) return { ...DEFAULT_BRAND, ...data }
   }
   return DEFAULT_BRAND
+}
+
+export async function getPartners(): Promise<Partner[]> {
+  // 1. Prioriza parceiros cadastrados no Sanity.io
+  const sanityPartners = await getSanityPartners()
+  if (sanityPartners && sanityPartners.length > 0) {
+    return sanityPartners
+  }
+  return DEFAULT_PARTNERS
 }
 
 export async function getProperties(): Promise<Property[]> {
