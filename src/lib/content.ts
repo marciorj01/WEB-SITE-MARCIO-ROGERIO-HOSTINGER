@@ -1,11 +1,4 @@
 import type { Article, Brand, Category, Development, Partner, Property } from '@/types/content'
-import { fetchStrapi, isStrapiConfigured } from '@/lib/strapi'
-import {
-  getSanityBrand,
-  getSanityPartners,
-  getSanityProperties,
-  getSanityPropertyBySlug,
-} from '@/sanity/queries'
 
 export const DEFAULT_BRAND: Brand = {
   name: 'Marcio Rogério',
@@ -267,113 +260,45 @@ export const DEFAULT_PARTNERS: Partner[] = [
 ]
 
 /**
- * Funções de consulta de conteúdo
- * Desacopladas: priorizam Sanity.io, com fallback gracioso.
+ * Funções de consulta de conteúdo (100% Estático e Local)
+ * Rápidas, seguras, sem dependências de CMS ou APIs externas.
  */
 
 export async function getBrand(): Promise<Brand> {
-  // 1. Prioriza configurações e textos cadastrados no Sanity.io
-  const sanityBrand = await getSanityBrand()
-  if (sanityBrand) {
-    return { ...DEFAULT_BRAND, ...sanityBrand }
-  }
-
-  // 2. Tenta Strapi se configurado
-  if (isStrapiConfigured()) {
-    const data = await fetchStrapi<Brand>('/brand?populate=*')
-    if (data) return { ...DEFAULT_BRAND, ...data }
-  }
   return DEFAULT_BRAND
 }
 
 export async function getPartners(): Promise<Partner[]> {
-  // 1. Prioriza parceiros cadastrados no Sanity.io
-  const sanityPartners = await getSanityPartners()
-  if (sanityPartners && sanityPartners.length > 0) {
-    return sanityPartners
-  }
   return DEFAULT_PARTNERS
 }
 
 export async function getProperties(): Promise<Property[]> {
-  // 1. Prioriza dados do Sanity.io se houver imóveis cadastrados
-  const sanityProperties = await getSanityProperties()
-  if (sanityProperties && sanityProperties.length > 0) {
-    return sanityProperties
-  }
-
-  // 2. Tenta Strapi se configurado
-  if (isStrapiConfigured()) {
-    const data = await fetchStrapi<Property[]>('/properties?populate=*')
-    if (data && Array.isArray(data) && data.length > 0) return data
-  }
-
-  // 3. Fallback gracioso para dados locais de exemplo
   return DEFAULT_PROPERTIES
 }
 
 export async function getPropertyBySlug(slug: string): Promise<Property | null> {
-  // 1. Prioriza busca no Sanity.io
-  const sanityProperty = await getSanityPropertyBySlug(slug)
-  if (sanityProperty) {
-    return sanityProperty
-  }
-
-  // 2. Tenta Strapi se configurado
-  if (isStrapiConfigured()) {
-    const data = await fetchStrapi<Property[]>(
-      `/properties?filters[slug][$eq]=${encodeURIComponent(slug)}&populate=*`,
-    )
-    if (data && Array.isArray(data) && data[0]) return data[0]
-  }
-
-  // 3. Fallback gracioso para dados locais de exemplo
   const found = DEFAULT_PROPERTIES.find((p) => p.slug === slug)
   return found || null
 }
 
 export async function getArticles(): Promise<Article[]> {
-  if (isStrapiConfigured()) {
-    const data = await fetchStrapi<Article[]>('/articles?populate=*')
-    if (data && Array.isArray(data) && data.length > 0) return data
-  }
   return DEFAULT_ARTICLES
 }
 
 export async function getArticleBySlug(slug: string): Promise<Article | null> {
-  if (isStrapiConfigured()) {
-    const data = await fetchStrapi<Article[]>(
-      `/articles?filters[slug][$eq]=${encodeURIComponent(slug)}&populate=*`,
-    )
-    if (data && Array.isArray(data) && data[0]) return data[0]
-  }
   const found = DEFAULT_ARTICLES.find((a) => a.slug === slug)
   return found || null
 }
 
 export async function getCategories(): Promise<Category[]> {
-  if (isStrapiConfigured()) {
-    const data = await fetchStrapi<Category[]>('/categories?populate=*')
-    if (data && Array.isArray(data) && data.length > 0) return data
-  }
   return DEFAULT_CATEGORIES
 }
 
 export async function getDevelopments(): Promise<Development[]> {
-  if (isStrapiConfigured()) {
-    const data = await fetchStrapi<Development[]>('/developments?populate=*')
-    if (data && Array.isArray(data) && data.length > 0) return data
-  }
   return DEFAULT_DEVELOPMENTS
 }
 
 export async function getDevelopmentBySlug(slug: string): Promise<Development | null> {
-  if (isStrapiConfigured()) {
-    const data = await fetchStrapi<Development[]>(
-      `/developments?filters[slug][$eq]=${encodeURIComponent(slug)}&populate=*`,
-    )
-    if (data && Array.isArray(data) && data[0]) return data[0]
-  }
   const found = DEFAULT_DEVELOPMENTS.find((d) => d.slug === slug)
   return found || null
 }

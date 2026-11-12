@@ -2,7 +2,6 @@
 
 import type { FormState } from '@/lib/form-state'
 import type { Lead } from '@/types/content'
-import { fetchStrapi, isStrapiConfigured } from '@/lib/strapi'
 
 const value = (data: FormData, key: string, max: number) => {
   const input = data.get(key)
@@ -74,14 +73,7 @@ export async function submitContact(_previous: FormState, formData: FormData): P
   }
 
   try {
-    if (isStrapiConfigured()) {
-      await fetchStrapi('/leads', {
-        method: 'POST',
-        body: JSON.stringify({ data: leadData }),
-      })
-    } else {
-      console.log('[lead] Novo contato registrado:', leadData)
-    }
+    console.log('[lead] Novo contato registrado:', leadData)
 
     return {
       success: true,
@@ -118,14 +110,7 @@ export async function subscribeNewsletter(
   const subscriberData = { name, email, consent }
 
   try {
-    if (isStrapiConfigured()) {
-      await fetchStrapi('/newsletter-subscribers', {
-        method: 'POST',
-        body: JSON.stringify({ data: subscriberData }),
-      })
-    } else {
-      console.log('[newsletter] Novo inscrito registrado:', subscriberData)
-    }
+    console.log('[newsletter] Novo inscrito registrado:', subscriberData)
 
     return {
       success: true,
