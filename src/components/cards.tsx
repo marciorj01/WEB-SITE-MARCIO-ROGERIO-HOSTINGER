@@ -77,10 +77,10 @@ export function PropertyCard({
             ? 'Referência ilustrativa · não é oferta comercial'
             : property.price
               ? new Intl.NumberFormat('pt-BR', {
-                  style: 'currency',
-                  currency: 'BRL',
-                  maximumFractionDigits: 0,
-                }).format(property.price)
+                style: 'currency',
+                currency: 'BRL',
+                maximumFractionDigits: 0,
+              }).format(property.price)
               : 'Informações sob consulta'}
         </p>
       </div>

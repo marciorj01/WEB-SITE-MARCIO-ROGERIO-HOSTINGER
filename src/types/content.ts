@@ -187,3 +187,4 @@ export interface NewsletterSubscriber {
   email: string
   consent: boolean
 }
+

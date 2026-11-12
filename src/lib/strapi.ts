@@ -99,3 +99,4 @@ export function getStrapiMedia(url?: string | null): string {
   const baseUrl = config?.url || ''
   return `${baseUrl}${url}`
 }
+
