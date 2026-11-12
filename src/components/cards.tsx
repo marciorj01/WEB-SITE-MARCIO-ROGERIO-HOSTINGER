@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import type { Article, Category, Development, Property } from '@/payload-types'
+import type { Article, Category, Development, Property } from '@/types/content'
 import { Icon } from './icons'
 import { MediaImage } from './ui'
 

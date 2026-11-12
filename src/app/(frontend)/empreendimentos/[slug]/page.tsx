@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { findBySlug } from '@/lib/payload'
-import { getDevelopments } from '@/lib/content'
+import { getDevelopmentBySlug, getDevelopments } from '@/lib/content'
 import { stageLabels } from '@/components/cards'
 import { Gallery } from '@/components/gallery'
 import { Typologies } from '@/components/typologies'
@@ -32,7 +31,7 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
-  const development = await findBySlug('developments', (await params).slug)
+  const development = await getDevelopmentBySlug((await params).slug)
   return {
     title: development
       ? `${development.title} | Empreendimentos | Marcio Rogério`
@@ -41,7 +40,7 @@ export async function generateMetadata({
   }
 }
 export default async function DevelopmentPage({ params }: { params: Promise<{ slug: string }> }) {
-  const project = await findBySlug('developments', (await params).slug)
+  const project = await getDevelopmentBySlug((await params).slug)
   if (!project) notFound()
   return (
     <main id="main-content">

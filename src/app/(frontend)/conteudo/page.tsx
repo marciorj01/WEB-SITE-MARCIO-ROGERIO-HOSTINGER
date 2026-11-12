@@ -1,4 +1,3 @@
-import { renderVisualPage } from '@/components/visual-page'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getArticles, getCategories } from '@/lib/content'
@@ -15,8 +14,6 @@ export const metadata: Metadata = {
     'Arquitetura, mercado, investimentos e patrimônio. Uma revista para escolher melhor e construir novas perspectivas.',
 }
 export default async function ContentPage() {
-  const visualPage = await renderVisualPage('/conteudo')
-  if (visualPage) return visualPage
   const [articles, categories] = await Promise.all([getArticles(), getCategories()])
   const feature = articles.find((article) => article.featured) || articles[0]
   const secondary = articles

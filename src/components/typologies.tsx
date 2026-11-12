@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import type { Development } from '@/payload-types'
+import type { Development } from '@/types/content'
 import { MediaImage, ButtonLink } from './ui'
 import { Icon } from './icons'
 import { navigateTabs } from './tab-keyboard'

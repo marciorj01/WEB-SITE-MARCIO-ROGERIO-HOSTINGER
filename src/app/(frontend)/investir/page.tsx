@@ -1,4 +1,3 @@
-import { renderVisualPage } from '@/components/visual-page'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getArticles, getBrand, getProperties } from '@/lib/content'
@@ -13,8 +12,6 @@ export const metadata: Metadata = {
     'Investir em imóveis com visão de longo prazo, análise e uma estratégia alinhada ao seu perfil.',
 }
 export default async function InvestPage() {
-  const visualPage = await renderVisualPage('/investir')
-  if (visualPage) return visualPage
   const [brand, properties, articles] = await Promise.all([
     getBrand(),
     getProperties(),

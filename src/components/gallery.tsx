@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import type { Media } from '@/payload-types'
+import type { Media } from '@/types/content'
 import { MediaImage } from './ui'
 import { Icon } from './icons'
 

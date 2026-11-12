@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useActionState, useEffect, useId, useRef, useState, type FormEvent } from 'react'
-import type { Lead } from '@/payload-types'
+import type { Lead } from '@/types/content'
 import { subscribeNewsletter, submitContact } from '@/app/(frontend)/actions'
 import { initialFormState } from '@/lib/form-state'
 import { Icon } from './icons'

@@ -1,4 +1,3 @@
-import { renderVisualPage } from '@/components/visual-page'
 import type { Metadata } from 'next'
 import { getDevelopments } from '@/lib/content'
 import { DevelopmentCard } from '@/components/cards'
@@ -10,8 +9,6 @@ export const metadata: Metadata = {
   description: 'Uma seleção de projetos com arquitetura, contexto e novas perspectivas para viver.',
 }
 export default async function DevelopmentsPage() {
-  const visualPage = await renderVisualPage('/empreendimentos')
-  if (visualPage) return visualPage
   const developments = await getDevelopments()
   return (
     <main id="main-content">

@@ -1,4 +1,3 @@
-import { renderVisualPage } from '@/components/visual-page'
 import type { Metadata } from 'next'
 import { getBrand } from '@/lib/content'
 import { ContactForm } from '@/components/forms'
@@ -11,8 +10,6 @@ export const metadata: Metadata = {
     'Avaliação, posicionamento, apresentação profissional e acompanhamento personalizado para vender seu imóvel.',
 }
 export default async function SellPage() {
-  const visualPage = await renderVisualPage('/vender')
-  if (visualPage) return visualPage
   const brand = await getBrand()
   return (
     <main id="main-content">

@@ -1,10 +1,8 @@
 'use server'
 
-import { headers } from 'next/headers'
-import { ValidationError } from 'payload'
-import type { Lead } from '@/payload-types'
-import { getPayloadClient } from '@/lib/payload'
 import type { FormState } from '@/lib/form-state'
+import type { Lead } from '@/types/content'
+import { fetchStrapi, isStrapiConfigured } from '@/lib/strapi'
 
 const value = (data: FormData, key: string, max: number) => {
   const input = data.get(key)
@@ -13,20 +11,6 @@ const value = (data: FormData, key: string, max: number) => {
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const intents = ['contact', 'buy', 'sell', 'invest', 'development', 'material'] as const
 const types = ['Casa', 'Apartamento', 'Studio', 'Cobertura', 'Terreno', 'Outro'] as const
-
-function validationResult(error: unknown): FormState {
-  if (error instanceof ValidationError) {
-    const errors: Record<string, string> = {}
-    for (const item of error.data.errors) {
-      if ('path' in item && item.path) errors[item.path] = item.message
-    }
-    return { success: false, message: 'Confira os campos indicados e tente novamente.', errors }
-  }
-  return {
-    success: false,
-    message: 'Não foi possível registrar sua solicitação agora. Tente novamente em instantes.',
-  }
-}
 
 export async function submitContact(_previous: FormState, formData: FormData): Promise<FormState> {
   const name = value(formData, 'name', 100)
@@ -39,6 +23,7 @@ export async function submitContact(_previous: FormState, formData: FormData): P
   const property = value(formData, 'property', 200)
   const development = value(formData, 'development', 200)
   const consent = formData.get('consent') === 'on'
+
   const values = {
     name,
     email,
@@ -48,6 +33,7 @@ export async function submitContact(_previous: FormState, formData: FormData): P
     message,
     consent: consent ? 'on' : '',
   }
+
   const errors: Record<string, string> = {}
   if (name.length < 2 || name.length > 100)
     errors.name = 'Informe seu nome, entre 2 e 100 caracteres.'
@@ -73,33 +59,42 @@ export async function submitContact(_previous: FormState, formData: FormData): P
     }
   if (Object.keys(errors).length)
     return { success: false, message: 'Revise os campos abaixo.', errors, values }
+
+  const leadData = {
+    name,
+    email,
+    whatsapp,
+    intent: intentInput as Lead['intent'],
+    consent,
+    ...(propertyType ? { propertyType: propertyType as Lead['propertyType'] } : {}),
+    ...(location ? { location } : {}),
+    ...(message ? { message } : {}),
+    ...(property ? { property } : {}),
+    ...(development ? { development } : {}),
+  }
+
   try {
-    const payload = await getPayloadClient()
-    const { user } = await payload.auth({ headers: await headers() })
-    await payload.create({
-      collection: 'leads',
-      overrideAccess: false,
-      user,
-      data: {
-        name,
-        email,
-        whatsapp,
-        intent: intentInput as Lead['intent'],
-        consent,
-        ...(propertyType ? { propertyType: propertyType as Lead['propertyType'] } : {}),
-        ...(location ? { location } : {}),
-        ...(message ? { message } : {}),
-        ...(property ? { property: Number(property) || property } : {}),
-        ...(development ? { development: Number(development) || development } : {}),
-      } as any,
-    })
+    if (isStrapiConfigured()) {
+      await fetchStrapi('/leads', {
+        method: 'POST',
+        body: JSON.stringify({ data: leadData }),
+      })
+    } else {
+      console.log('[lead] Novo contato registrado:', leadData)
+    }
+
     return {
       success: true,
       message:
-        'Sua solicitação foi recebida. A equipe poderá entrar em contato pelos dados que você informou.',
+        'Sua solicitação foi recebida com sucesso. A equipe entrará em contato em breve.',
     }
-  } catch (error) {
-    return { ...validationResult(error), values }
+  } catch (error: any) {
+    console.error('[lead] Erro ao registrar contato:', error)
+    return {
+      success: false,
+      message: 'Não foi possível registrar sua solicitação agora. Tente novamente em instantes.',
+      values,
+    }
   }
 }
 
@@ -119,21 +114,30 @@ export async function subscribeNewsletter(
     return { success: false, message: 'Solicitação não permitida.' }
   if (Object.keys(errors).length)
     return { success: false, message: 'Confira seus dados para continuar.', errors, values }
+
+  const subscriberData = { name, email, consent }
+
   try {
-    const payload = await getPayloadClient()
-    const { user } = await payload.auth({ headers: await headers() })
-    await payload.create({
-      collection: 'newsletter-subscribers',
-      overrideAccess: false,
-      user,
-      data: { name, email, consent },
-    })
+    if (isStrapiConfigured()) {
+      await fetchStrapi('/newsletter-subscribers', {
+        method: 'POST',
+        body: JSON.stringify({ data: subscriberData }),
+      })
+    } else {
+      console.log('[newsletter] Novo inscrito registrado:', subscriberData)
+    }
+
     return {
       success: true,
       message:
         'Inscrição recebida. Seu interesse e sua autorização estão registrados. Obrigado por fazer parte.',
     }
-  } catch (error) {
-    return { ...validationResult(error), values }
+  } catch (error: any) {
+    console.error('[newsletter] Erro ao registrar inscrição:', error)
+    return {
+      success: false,
+      message: 'Não foi possível registrar sua inscrição agora. Tente novamente em instantes.',
+      values,
+    }
   }
 }

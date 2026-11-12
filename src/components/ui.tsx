@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import type { ReactNode } from 'react'
-import type { Media } from '@/payload-types'
+import type { Media } from '@/types/content'
 import { Icon } from './icons'
 
 export const container = 'mx-auto w-full max-w-[1440px] px-6 sm:px-10 lg:px-[7%]'
@@ -123,7 +123,7 @@ export function MediaImage({
   return (
     <Image
       src={src}
-      alt={alt ?? media.alt}
+      alt={alt ?? media.alt ?? 'Fotografia'}
       fill
       sizes={sizes}
       priority={priority}

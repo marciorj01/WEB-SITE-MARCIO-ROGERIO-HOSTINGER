@@ -1,4 +1,3 @@
-import { renderVisualPage } from '@/components/visual-page'
 import type { Metadata } from 'next'
 import { getProperties } from '@/lib/content'
 import { PropertyCollection } from '@/components/collections'
@@ -13,8 +12,6 @@ export const metadata: Metadata = {
 }
 
 export default async function BuyPage() {
-  const visualPage = await renderVisualPage('/comprar')
-  if (visualPage) return visualPage
   const properties = await getProperties()
   return (
     <main id="main-content">

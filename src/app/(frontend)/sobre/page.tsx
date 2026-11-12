@@ -1,4 +1,3 @@
-import { renderVisualPage } from '@/components/visual-page'
 import type { Metadata } from 'next'
 import { getBrand } from '@/lib/content'
 import { ContactCTA } from '@/components/contact-cta'
@@ -10,8 +9,6 @@ export const metadata: Metadata = {
     'Uma consultoria que conecta pessoas, patrimônio e possibilidades com escuta, curadoria e perspectiva.',
 }
 export default async function AboutPage() {
-  const visualPage = await renderVisualPage('/sobre')
-  if (visualPage) return visualPage
   const brand = await getBrand()
   return (
     <main id="main-content">

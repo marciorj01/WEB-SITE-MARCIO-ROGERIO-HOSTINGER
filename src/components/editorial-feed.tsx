@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import type { Article, Category } from '@/payload-types'
+import type { Article, Category } from '@/types/content'
 import { ArticleCard, categoryOf } from './cards'
 import { Icon } from './icons'
 

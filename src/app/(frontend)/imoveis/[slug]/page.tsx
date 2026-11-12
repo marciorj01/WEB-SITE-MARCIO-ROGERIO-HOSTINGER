@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { findBySlug } from '@/lib/payload'
-import { getProperties } from '@/lib/content'
+import { getPropertyBySlug, getProperties } from '@/lib/content'
 import { PropertyCard, segmentLabels } from '@/components/cards'
 import { Gallery } from '@/components/gallery'
 import { ContactForm } from '@/components/forms'
@@ -30,14 +29,14 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
-  const property = await findBySlug('properties', (await params).slug)
+  const property = await getPropertyBySlug((await params).slug)
   return {
     title: property ? `${property.title} | Curadoria de Marcio Rogério` : 'Imóvel não encontrado | Marcio Rogério',
     description: property?.description,
   }
 }
 export default async function PropertyPage({ params }: { params: Promise<{ slug: string }> }) {
-  const property = await findBySlug('properties', (await params).slug)
+  const property = await getPropertyBySlug((await params).slug)
   if (!property) notFound()
   const others = (await getProperties()).filter((item) => item.id !== property.id).slice(0, 3)
   const gallery = [

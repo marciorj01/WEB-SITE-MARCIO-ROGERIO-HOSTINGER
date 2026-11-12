@@ -1,9 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { RichText } from '@payloadcms/richtext-lexical/react'
-import { findBySlug } from '@/lib/payload'
-import { getArticles } from '@/lib/content'
+import { RichText } from '@/components/rich-text'
+import { getArticleBySlug, getArticles } from '@/lib/content'
 import { ArticleCard, ArticleMeta, CategoryLabel, categoryOf } from '@/components/cards'
 import { ArticleTools } from '@/components/article-tools'
 import { Newsletter } from '@/components/forms'
@@ -25,7 +24,7 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
-  const article = await findBySlug('articles', (await params).slug)
+  const article = await getArticleBySlug((await params).slug)
   if (!article) return { title: 'Artigo não encontrado | Marcio Rogério' }
   const cover = typeof article.cover === 'object' ? article.cover : null
   return {
@@ -42,7 +41,7 @@ export async function generateMetadata({
 }
 
 export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
-  const article = await findBySlug('articles', (await params).slug)
+  const article = await getArticleBySlug((await params).slug)
   if (!article) notFound()
   const all = await getArticles()
   const category = categoryOf(article)

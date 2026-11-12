@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import type { Property } from '@/payload-types'
+import type { Property } from '@/types/content'
 import { PropertyCard, segmentLabels } from './cards'
 import { ButtonLink, EmptyState, Eyebrow, MediaImage } from './ui'
 import { Icon } from './icons'

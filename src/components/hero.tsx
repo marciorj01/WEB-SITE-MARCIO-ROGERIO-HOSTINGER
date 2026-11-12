@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import type { Brand } from '@/payload-types'
+import type { Brand } from '@/types/content'
 import { ButtonLink, Eyebrow, MediaImage, container } from './ui'
 import { Icon } from './icons'
 

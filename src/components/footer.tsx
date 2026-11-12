@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import type { Brand } from '@/payload-types'
+import type { Brand } from '@/types/content'
 import { BrandMark } from './brand-mark'
 import { Icon } from './icons'
 import { container } from './ui'

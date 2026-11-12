@@ -1,12 +1,9 @@
-import { renderVisualPage } from '@/components/visual-page'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Breadcrumbs, Eyebrow, container } from '@/components/ui'
 
 export const metadata: Metadata = { title: 'Privacidade e proteção de dados | Marcio Rogério' }
 export default async function PrivacyPage() {
-  const visualPage = await renderVisualPage('/privacidade')
-  if (visualPage) return visualPage
   return (
     <main id="main-content" className={`${container} pt-9 pb-24`}>
       <Breadcrumbs items={[{ label: 'Privacidade' }]} />
@@ -37,8 +34,7 @@ export default async function PrivacyPage() {
           <h2>Quem pode acessar</h2>
           <p>
             Solicitações e assinaturas não ficam disponíveis publicamente. O acesso é restrito aos
-            responsáveis autorizados no painel de gestão. O serviço utiliza a infraestrutura do
-            Figma Make e do Payload para armazenamento e operação.
+            responsáveis autorizados na plataforma de gestão.
           </p>
           <h2>Seu controle sobre os dados</h2>
           <p>
