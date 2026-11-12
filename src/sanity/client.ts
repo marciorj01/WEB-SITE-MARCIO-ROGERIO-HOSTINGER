@@ -11,3 +11,4 @@ export const client = createClient({
 export function isSanityConfigured(): boolean {
   return Boolean(projectId && dataset)
 }
+

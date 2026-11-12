@@ -6,3 +6,4 @@ export const dataset =
 
 export const projectId =
   process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'u7l3uk5q'
+
